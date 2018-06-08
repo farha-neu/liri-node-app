@@ -4,6 +4,7 @@ var Spotify = require('node-spotify-api');
 var request = require("request");
 
 var keys = require("./keys.js");
+var fs = require("fs");
 
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
@@ -20,9 +21,20 @@ for(var i =3; i<process.argv.length;i++){
  }
 }
 
-
-//This will show your last 20 tweets and when they were created at in your terminal/bash window.
 if(command ==="my-tweets"){
+   myTweets();
+}
+else if(command === "spotify-this-song"){
+   spotifyThisSong(track);
+}
+else if(command === "movie-this"){
+   movieThis(track);
+}
+else if(command === "do-what-it-says"){
+    doWhatItSays();
+}
+
+function myTweets(){
     var params = {screen_name: 'aliceliriliri',count: 20};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
@@ -33,65 +45,90 @@ if(command ==="my-tweets"){
     }
   });
 }
-else if(command === "spotify-this-song"){
+
+function spotifyThisSong(track){
     if(track){
-        spotify.search({ type: 'track', query: track}, function(err, data) {
+        spotify.search({ type: 'track', query: track,limit:5}, function(err, data) {
             if (err) {
               return console.log('Error occurred: ' + err);
             }
-            for(var i = 0; i<data.tracks.items.length;i++){
-                console.log("Song Name: "+data.tracks.items[i].name);
-                console.log("Artists: ");
-                for(var j = 0; j<data.tracks.items[i].artists.length;j++){
-                    console.log(data.tracks.items[i].artists[j].name);
-                }
-                console.log("Preview link: "+data.tracks.items[i].external_urls.spotify);
-                console.log("Album: "+data.tracks.items[i].album.name);   
-                console.log("\r\n");
-                
-            }         
+            if(data.tracks.items.length>0){
+                for(var i = 0; i<data.tracks.items.length;i++){
+                    console.log("Song Name: "+data.tracks.items[i].name);
+                    console.log("Artists: ");
+                    for(var j = 0; j<data.tracks.items[i].artists.length;j++){
+                        console.log(data.tracks.items[i].artists[j].name);
+                    }
+                    console.log("Preview link: "+data.tracks.items[i].external_urls.spotify);
+                    console.log("Album: "+data.tracks.items[i].album.name);   
+                    console.log("\r\n");
+                    
+                }      
+            }
+            else{
+                console.log("Song not found!");
+            }
+              
          });
     }
     else{
         console.log(defaultSong);
     } 
 }
-else if(command === "movie-this"){
+
+function movieThis(track){
     if(!track){
         track = "Mr.Nobody";
     }
+
     var queryUrl = "http://www.omdbapi.com/?t=" + track + "&y=&plot=short&apikey=trilogy";
     console.log(queryUrl);
 
 
     request(queryUrl, function(error, response, body) {
-
+      
     if (!error && response.statusCode === 200) {
         var movieObject = JSON.parse(body);
-        console.log("Title: " + movieObject.Title);
-        console.log("Year: " +  movieObject.Year);
-        console.log("Rotten Tomato Rating: " +  movieObject.Ratings[1].value);
-        console.log("Country Produced: " +  movieObject.Country);
-        console.log("Language: " +  movieObject.Language);
-        console.log("Plot: " +  movieObject.Plot);
-        console.log("Actors: " +  movieObject.Actors);
+
+        if(movieObject.Response==="False"){
+            console.log(movieObject.Error);
+        }
+        else{
+            console.log("Title: " + movieObject.Title);
+            console.log("Year: " +  movieObject.Year);
+            console.log("Rotten Tomato Rating: " +  movieObject.Ratings[1].Value);
+            console.log("Country Produced: " +  movieObject.Country);
+            console.log("Language: " +  movieObject.Language);
+            console.log("Plot: " +  movieObject.Plot);
+            console.log("Actors: " +  movieObject.Actors);
+        }
     }
+    
     });
+        
 }
 
-// * Title of the movie.
-//   * Year the movie came out.
-//   * IMDB Rating of the movie.
-//   * Rotten Tomatoes Rating of the movie.
-//   * Country where the movie was produced.
-//   * Language of the movie.
-//   * Plot of the movie.
-//   * Actors in the movie.
+function doWhatItSays(){
+        fs.readFile("random.txt", "utf8", function(error, data) {
 
-// my-tweets
-
-// spotify-this-song
-
-// movie-this
-
-// do-what-it-says
+        if (error) {
+          return console.log(error);
+        }
+      
+        var dataArr = data.split(",");
+      
+        var command = dataArr[0];
+        var trackOrMovie = dataArr[1];
+        
+        if(command ==="spotify-this-song"){
+            spotifyThisSong(trackOrMovie);
+        }
+        else if(command==="movie-this"){
+            movieThis(trackOrMovie);
+        }
+        else if(command==="my-tweets"){
+            myTweets();
+        }
+      
+    });
+}
