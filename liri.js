@@ -59,8 +59,11 @@ function myTweets(){
 function spotifyThisSong(track){
   
     if(track){
-        text+=" "+track+"\r\n\r\n";
-        spotify.search({ type: 'track', query: track,limit:5}, function(err, data) {
+        if(!doWhat){
+            text+=" "+track;
+        }
+        text+="\r\n\r\n";
+        spotify.search({ type: 'track', query: track,limit:10}, function(err, data) {
             if (err) {
               var error = "Error occurred: " + err;
               text+=error+"\r\n";
@@ -110,17 +113,19 @@ function spotifyThisSong(track){
 }
 
 function movieThis(track){
-    if(!doWhat){
-        if(track){
-            text+=" "+track;
-        }
-        else{
-            track = "Mr.Nobody";
-        }    
+  
+     
+    
+    if(doWhat||!track){
+        text+="\r\n\r\n";
+    }
+    else if(track){
+        text+=" "+track+"\r\n\r\n";
+    }
+    if(!track){
+        track = "Mr.Nobody";
     }
    
-    
-    text+="\r\n\r\n";
     var queryUrl = "http://www.omdbapi.com/?t=" + track + "&y=&plot=short&apikey=trilogy";
     // console.log(queryUrl);
 
