@@ -12,7 +12,6 @@ var command = process.argv[2];
 var defaultSong = "The Sign by Ace of Base";
 
 var track="";
-// ...
 for(var i =3; i<process.argv.length;i++){
  var t = process.argv[i];
  track = track+" "+t;
@@ -20,6 +19,10 @@ for(var i =3; i<process.argv.length;i++){
     track = t;
  }
 }
+
+var doWhat = false;
+
+var text = "******************\r\nCommand: "+command;
 
 if(command ==="my-tweets"){
    myTweets();
@@ -35,54 +38,89 @@ else if(command === "do-what-it-says"){
 }
 
 function myTweets(){
+    text+="\r\n\r\n";
     var params = {screen_name: 'aliceliriliri',count: 20};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
         for(var i = 0; i < tweets.length; i++){
-            console.log(tweets[i].text);
-            console.log("Created at: "+tweets[i].created_at+"\r\n");
+            var tweetText = tweets[i].text;
+            var date = tweets[i].created_at+"\r\n";
+            console.log(tweetText);
+            console.log("Created at: "+date);
+            text+=tweetText+"\r\n"+date+"\r\n";
         } 
     }
+    appendFile(text);
   });
 }
 
 function spotifyThisSong(track){
+  
     if(track){
+        text+=" "+track+"\r\n\r\n";
         spotify.search({ type: 'track', query: track,limit:5}, function(err, data) {
             if (err) {
-              return console.log('Error occurred: ' + err);
+              var error = "Error occurred: " + err;
+              text+=error+"\r\n";
+              return console.log(error);
             }
             if(data.tracks.items.length>0){
                 for(var i = 0; i<data.tracks.items.length;i++){
-                    console.log("Song Name: "+data.tracks.items[i].name);
+                    var songName = "Song Name: "+data.tracks.items[i].name;
+                    console.log(songName);
                     console.log("Artists: ");
+                    text+=songName+"\r\n"+"Artists: ";
                     for(var j = 0; j<data.tracks.items[i].artists.length;j++){
-                        console.log(data.tracks.items[i].artists[j].name);
+                        var artist = data.tracks.items[i].artists[j].name;
+                        console.log(artist);
+                        if(j===data.tracks.items[i].artists.length-1){
+                            text+=artist;
+                        }
+                        else{
+                            text+=artist+",";
+                        }
+                       
                     }
-                    console.log("Preview link: "+data.tracks.items[i].external_urls.spotify);
-                    console.log("Album: "+data.tracks.items[i].album.name);   
-                    console.log("\r\n");
+                    var previewLink = "Preview link: "+data.tracks.items[i].external_urls.spotify+"\r\n";
+                    var album = "Album: "+data.tracks.items[i].album.name+"\r\n";
+                    console.log(previewLink+album);  
+                    text+="\r\n"+previewLink+album+"\r\n";
                     
                 }      
+                appendFile(text);
             }
             else{
-                console.log("Song not found!");
+                var message = "Song not found!";
+                console.log(message);
+                text+=message+"\r\n\r\n";
+                appendFile(text);
             }
-              
+           
          });
+        
     }
     else{
         console.log(defaultSong);
+        text+= "\r\n\r\n"+defaultSong+"\r\n\r\n";
+        appendFile(text);
     } 
+   
 }
 
 function movieThis(track){
-    if(!track){
-        track = "Mr.Nobody";
+    if(!doWhat){
+        if(track){
+            text+=" "+track;
+        }
+        else{
+            track = "Mr.Nobody";
+        }    
     }
-
+   
+    
+    text+="\r\n\r\n";
     var queryUrl = "http://www.omdbapi.com/?t=" + track + "&y=&plot=short&apikey=trilogy";
-    console.log(queryUrl);
+    // console.log(queryUrl);
 
 
     request(queryUrl, function(error, response, body) {
@@ -91,24 +129,31 @@ function movieThis(track){
         var movieObject = JSON.parse(body);
 
         if(movieObject.Response==="False"){
-            console.log(movieObject.Error);
+            var errorMessage = movieObject.Error;
+            console.log(errorMessage);
+            text+=errorMessage+"\r\n\r\n";
         }
         else{
-            console.log("Title: " + movieObject.Title);
-            console.log("Year: " +  movieObject.Year);
-            console.log("Rotten Tomato Rating: " +  movieObject.Ratings[1].Value);
-            console.log("Country Produced: " +  movieObject.Country);
-            console.log("Language: " +  movieObject.Language);
-            console.log("Plot: " +  movieObject.Plot);
-            console.log("Actors: " +  movieObject.Actors);
+            var title = "Title: " + movieObject.Title+"\r\n";
+            var year = "Year: " +  movieObject.Year+"\r\n";
+            var rating =  "Rotten Tomato Rating: " +movieObject.Ratings[1].Value+"\r\n";
+            var country = "Country Produced: " + movieObject.Country+"\r\n";
+            var language = "Language: " +  movieObject.Language+"\r\n";
+            var plot = "Plot: " + movieObject.Plot+"\r\n";
+            var actors = "Actors: " + movieObject.Actors+"\r\n";
+            console.log(title+year+rating+country+language+plot+actors);
+            text+=title+year+rating+country+language+plot+actors+"\r\n";
+    
         }
     }
+    appendFile(text);
     
     });
         
 }
 
 function doWhatItSays(){
+        doWhat = true;
         fs.readFile("random.txt", "utf8", function(error, data) {
 
         if (error) {
@@ -129,6 +174,16 @@ function doWhatItSays(){
         else if(command==="my-tweets"){
             myTweets();
         }
+        doWhat = false;
       
     });
+}
+
+function appendFile(text){
+    fs.appendFile("log.txt", text, function(err) {
+        if (err) {
+          console.log(err);
+        }
+      
+      });
 }
