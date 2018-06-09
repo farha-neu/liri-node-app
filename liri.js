@@ -63,7 +63,7 @@ function myTweets(){
 function spotifyThisSong(inputArg){
   
     if(inputArg){
-        spotify.search({ type: 'track', query: inputArg,limit:10}, function(err, data) {
+        spotify.search({ type: 'track', query: inputArg, limit:5}, function(err, data) {
             var dataItems = data.tracks.items;
             if (err) {
               var error = "Error occurred: " + err;
@@ -136,7 +136,7 @@ function movieThis(inputArg){
             var plot = "Plot: " + movieObject.Plot+"\r\n";
             var actors = "Actors: " + movieObject.Actors+"\r\n";
             text+=title+year;
-            if(movieObject.Ratings.length>0){
+            if(movieObject.Ratings.length>1){
                 var rating =  "Rotten Tomato Rating: " +movieObject.Ratings[1].Value+"\r\n";
                 text+=rating;
             }
