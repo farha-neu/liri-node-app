@@ -83,7 +83,12 @@ function spotifyThisSong(inputArg){
                             text+=artist+", ";
                         }                
                     }
-                    var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
+                    if(dataItems[i].preview_url!==null){
+                          var previewLink = "Preview link: "+dataItems[i].preview_url;
+                    }
+                    else{
+                        var previewLink = "Preview link: N/A";
+                    }
                     var album = "Album: "+dataItems[i].album.name; 
                     text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n";                   
                 } 
@@ -115,8 +120,7 @@ function movieThis(inputArg){
     }
    
     var queryUrl = "http://www.omdbapi.com/?t=" + inputArg + "&y=&plot=short&apikey=trilogy";
-    console.log(queryUrl);
-  
+    
     request(queryUrl, function(error, response, body) {
       
     if (!error && response.statusCode === 200) {
@@ -131,16 +135,18 @@ function movieThis(inputArg){
         else{
             var title = "Title: " + movieObject.Title+"\r\n";
             var year = "Year: " +  movieObject.Year+"\r\n";
+            var imdb = "IMDB Rating: " +  movieObject.imdbRating+"\r\n";
             var country = "Country Produced: " + movieObject.Country+"\r\n";
             var language = "Language: " +  movieObject.Language+"\r\n";
             var plot = "Plot: " + movieObject.Plot+"\r\n";
             var actors = "Actors: " + movieObject.Actors+"\r\n";
-            text+=title+year;
             if(movieObject.Ratings.length>1){
                 var rating =  "Rotten Tomato Rating: " +movieObject.Ratings[1].Value+"\r\n";
-                text+=rating;
             }
-            text+=country+language+plot+actors;
+            else{
+                var rating =  "Rotten Tomato Rating: N/A\r\n";
+            }
+            text+=title+year+imdb+rating+country+language+plot+actors;
             console.log(text);
             appendFile(text+"\r\n------------------------------------\r\n");    
         }
