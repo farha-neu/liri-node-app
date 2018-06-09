@@ -10,114 +10,112 @@ var fs = require("fs");
 
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
+
 var command = process.argv[2];
-var defaultSong = "The Sign by Ace of Base";
 
-var track="";
+//if no song provided
+var defaultSong = '"The Sign" by Ace of Base';
+
+var inputArg="";
+
+//append all strings after command
 for(var i =3; i<process.argv.length;i++){
- var t = process.argv[i];
- track = track+" "+t;
- if(i==3){
-    track = t;
- }
+    var input = process.argv[i];
+    inputArg = inputArg+" "+input;
+    if(i==3){
+        inputArg = input;
+    }
 }
 
+var text='';
+var commandtext = "Command: "+command+" "+inputArg+"\r\n------------------------------------\r\n";
 
-
-var text = "******************\r\nCommand: "+command+" "+track+"\r\n";
-
-if(command ==="my-tweets"){
-   myTweets();
-}
-else if(command === "spotify-this-song"){
-   spotifyThisSong(track);
-}
-else if(command === "movie-this"){
-   movieThis(track);
-}
-else if(command === "do-what-it-says"){
-    doWhatItSays();
+switch (command) {
+    case "my-tweets":
+        myTweets();
+        break;
+    case "spotify-this-song":
+        spotifyThisSong(inputArg);
+        break;
+    case "movie-this":
+        movieThis(inputArg);
+        break;
+    case "do-what-it-says":
+        doWhatItSays();
+        break;
 }
 
 function myTweets(){
-    text+="\r\n\r\n";
     var params = {screen_name: 'aliceliriliri',count: 20};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
         for(var i = 0; i < tweets.length; i++){
             var tweetText = tweets[i].text;
-            var date = tweets[i].created_at+"\r\n";
-            console.log(tweetText);
-            console.log("Created at: "+date);
-            text+=tweetText+"\r\n"+date+"\r\n";
+            var date = tweets[i].created_at;
+            text+=tweetText+"\r\nCreated at: "+date+"\r\n\r\n";
         } 
     }
-    appendFile(text);
+    console.log(text);
+    appendFile(text+"------------------------------------\r\n");
   });
 }
 
-function spotifyThisSong(track){
+function spotifyThisSong(inputArg){
   
-    if(track){
-        spotify.search({ type: 'track', query: track,limit:10}, function(err, data) {
+    if(inputArg){
+        spotify.search({ type: 'track', query: inputArg,limit:10}, function(err, data) {
+            var dataItems = data.tracks.items;
             if (err) {
               var error = "Error occurred: " + err;
-              text+=error+"\r\n";
+              appendFile(error+"\r\n------------------------------------\r\n");
               return console.log(error);
             }
-            if(data.tracks.items.length>0){
-                for(var i = 0; i<data.tracks.items.length;i++){
-                    var songName = "Song Name: "+data.tracks.items[i].name;
-                    console.log(songName);
-                    console.log("Artists: ");
-                    text+=songName+"\r\n"+"Artists: ";
-                    for(var j = 0; j<data.tracks.items[i].artists.length;j++){
-                        var artist = data.tracks.items[i].artists[j].name;
-                        console.log(artist);
-                        if(j===data.tracks.items[i].artists.length-1){
+            if(dataItems.length>0){
+                for(var i = 0; i < dataItems.length; i++){
+                    var songName = dataItems[i].name;
+                    text+="Song name: "+songName+"\r\n"+"Artists: ";
+                    for(var j = 0; j<dataItems[i].artists.length;j++){
+                        var artist =dataItems[i].artists[j].name;
+                        if(j===dataItems[i].artists.length-1){
                             text+=artist;
                         }
                         else{
-                            text+=artist+",";
-                        }
-                       
+                            text+=artist+", ";
+                        }                
                     }
-                    var previewLink = "Preview link: "+data.tracks.items[i].external_urls.spotify+"\r\n";
-                    var album = "Album: "+data.tracks.items[i].album.name+"\r\n";
-                    console.log(previewLink+album);  
-                    text+="\r\n"+previewLink+album+"\r\n";
-                    
-                }      
-                appendFile(text);
+                    var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
+                    var album = "Album: "+dataItems[i].album.name; 
+                    text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n";                   
+                } 
+                console.log(text);
+                appendFile(text+"------------------------------------\r\n");     
             }
             else{
                 var message = "Song not found!";
+                text+=message;
                 console.log(message);
-                text+=message+"\r\n\r\n";
-                appendFile(text);
+                appendFile(text+"\r\n\r\n------------------------------------\r\n");
             }
+           
            
          });
         
     }
     else{
-        console.log(defaultSong);
-        text+= defaultSong+"\r\n\r\n";
-        appendFile(text);
-    } 
-   
+        text+= defaultSong;
+        console.log(text);
+        appendFile(text+"\r\n\r\n------------------------------------\r\n");
+    }   
 }
 
-function movieThis(track){
+function movieThis(inputArg){
   
-    if(!track){
-        track = "Mr.Nobody";
+    if(!inputArg){
+        inputArg = "Mr.Nobody";
     }
    
-    var queryUrl = "http://www.omdbapi.com/?t=" + track + "&y=&plot=short&apikey=trilogy";
-    // console.log(queryUrl);
-
-
+    var queryUrl = "http://www.omdbapi.com/?t=" + inputArg + "&y=&plot=short&apikey=trilogy";
+  
     request(queryUrl, function(error, response, body) {
       
     if (!error && response.statusCode === 200) {
@@ -127,6 +125,7 @@ function movieThis(track){
             var errorMessage = movieObject.Error;
             console.log(errorMessage);
             text+=errorMessage+"\r\n\r\n";
+            appendFile(text+"------------------------------------\r\n");
         }
         else{
             var title = "Title: " + movieObject.Title+"\r\n";
@@ -136,49 +135,47 @@ function movieThis(track){
             var language = "Language: " +  movieObject.Language+"\r\n";
             var plot = "Plot: " + movieObject.Plot+"\r\n";
             var actors = "Actors: " + movieObject.Actors+"\r\n";
-            console.log(title+year+rating+country+language+plot+actors);
-            text+=title+year+rating+country+language+plot+actors+"\r\n";
-    
+            text+=title+year+rating+country+language+plot+actors;
+            console.log(text);
+            appendFile(text+"\r\n------------------------------------\r\n");    
         }
     }
-    appendFile(text);
+   
     
     });
         
 }
 
-function doWhatItSays(){
-     
+function doWhatItSays(){   
         fs.readFile("random.txt", "utf8", function(error, data) {
 
-        if (error) {
-          return console.log(error);
-        }
-      
-        var dataArr = data.split(",");
-      
-        var command = dataArr[0];
-        var trackOrMovie = dataArr[1];
+            if (error) {
+            return console.log(error);
+            }
         
-        if(command ==="spotify-this-song"){
-            spotifyThisSong(trackOrMovie);
-        }
-        else if(command==="movie-this"){
-            movieThis(trackOrMovie);
-        }
-        else if(command==="my-tweets"){
-            myTweets();
-        }
-        doWhat = false;
-      
+            var dataArr = data.split(",");
+        
+            var command = dataArr[0];
+            var trackOrMovie = dataArr[1];
+
+            switch (command) {
+                case "my-tweets":
+                    myTweets();
+                    break;
+                case "spotify-this-song":
+                    spotifyThisSong(trackOrMovie);
+                    break;
+                case "movie-this":
+                    movieThis(trackOrMovie);
+                    break;
+            }       
     });
 }
 
 function appendFile(text){
-    fs.appendFile("log.txt", text, function(err) {
+    fs.appendFile("log.txt", commandtext+text, function(err) {
         if (err) {
           console.log(err);
-        }
-      
-      });
+       }
+    });
 }
