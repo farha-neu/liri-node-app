@@ -22,9 +22,9 @@ for(var i =3; i<process.argv.length;i++){
  }
 }
 
-var doWhat = false;
 
-var text = "******************\r\nCommand: "+command;
+
+var text = "******************\r\nCommand: "+command+" "+track+"\r\n";
 
 if(command ==="my-tweets"){
    myTweets();
@@ -59,10 +59,6 @@ function myTweets(){
 function spotifyThisSong(track){
   
     if(track){
-        if(!doWhat){
-            text+=" "+track;
-        }
-        text+="\r\n\r\n";
         spotify.search({ type: 'track', query: track,limit:10}, function(err, data) {
             if (err) {
               var error = "Error occurred: " + err;
@@ -106,7 +102,7 @@ function spotifyThisSong(track){
     }
     else{
         console.log(defaultSong);
-        text+= "\r\n\r\n"+defaultSong+"\r\n\r\n";
+        text+= defaultSong+"\r\n\r\n";
         appendFile(text);
     } 
    
@@ -114,14 +110,6 @@ function spotifyThisSong(track){
 
 function movieThis(track){
   
-     
-    
-    if(doWhat||!track){
-        text+="\r\n\r\n";
-    }
-    else if(track){
-        text+=" "+track+"\r\n\r\n";
-    }
     if(!track){
         track = "Mr.Nobody";
     }
@@ -160,7 +148,7 @@ function movieThis(track){
 }
 
 function doWhatItSays(){
-        doWhat = true;
+     
         fs.readFile("random.txt", "utf8", function(error, data) {
 
         if (error) {
