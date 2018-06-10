@@ -87,7 +87,9 @@ function spotifyThisSong(inputArg){
                           var previewLink = "Preview link: "+dataItems[i].preview_url;
                     }
                     else{
-                        var previewLink = "Preview link: N/A";
+                        // var previewLink = "Preview link: N/A";
+                        //if preview link not available, show external url
+                        var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
                     }
                     var album = "Album: "+dataItems[i].album.name; 
                     text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n";                   
