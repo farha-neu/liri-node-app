@@ -12,8 +12,7 @@ var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
 
 var command = process.argv[2];
-
-//if no song provided
+//if no song is provided
 var defaultSong = 'The Sign Ace of Base';
 
 var inputArg="";
@@ -27,9 +26,13 @@ for(var i =3; i<process.argv.length;i++){
     }
 }
 
+//twitter variables
+var tweeterCount = 20;
+var twitterScreenName = "aliceliriliri"; //optional param. replace screen_name by any twitter username
+
 var text='';
 var commandtext = "Command: "+command+" "+inputArg+"\r\n------------------------------------\r\n";
-var tweeterCount = 20;
+
 
 switch (command) {
     case "my-tweets":
@@ -47,7 +50,8 @@ switch (command) {
 }
 
 function myTweets(){
-    var params = {screen_name: 'aliceliriliri',count: tweeterCount};
+   
+    var params = {screen_name: twitterScreenName, count: tweeterCount};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
         for(var i = 0; i < tweets.length; i++){
