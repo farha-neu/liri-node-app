@@ -29,6 +29,7 @@ for(var i =3; i<process.argv.length;i++){
 
 var text='';
 var commandtext = "Command: "+command+" "+inputArg+"\r\n------------------------------------\r\n";
+var tweeterCount = 20;
 
 switch (command) {
     case "my-tweets":
@@ -46,7 +47,7 @@ switch (command) {
 }
 
 function myTweets(){
-    var params = {screen_name: 'aliceliriliri',count: 20};
+    var params = {screen_name: 'aliceliriliri',count: tweeterCount};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
         for(var i = 0; i < tweets.length; i++){
@@ -110,9 +111,8 @@ function printSong(dataItems,i){
             var previewLink = "Preview link: "+dataItems[i].preview_url;
     }
     else{
-        // var previewLink = "Preview link: N/A";
-        //if preview link not available, show external url
-        var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
+          //if preview link not available, N/A
+         var previewLink = "Preview link: N/A";
     }
     var album = "Album: "+dataItems[i].album.name; 
     text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n"; 
