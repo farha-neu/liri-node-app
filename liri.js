@@ -14,7 +14,7 @@ var client = new Twitter(keys.twitter);
 var command = process.argv[2];
 
 //if no song provided
-var defaultSong = '"The Sign" by Ace of Base';
+var defaultSong = 'The Sign Ace of Base';
 
 var inputArg="";
 
@@ -61,58 +61,61 @@ function myTweets(){
 }
 
 function spotifyThisSong(inputArg){
-  
+    //if input argument provided, print 1st 5 songs
     if(inputArg){
-        spotify.search({ type: 'track', query: inputArg, limit:5}, function(err, data) {
-            var dataItems = data.tracks.items;
-            if (err) {
-              var error = "Error occurred: " + err;
-              appendFile(error+"\r\n------------------------------------\r\n");
-              return console.log(error);
-            }
-            if(dataItems.length>0){
-                for(var i = 0; i < dataItems.length; i++){
-                    var songName = dataItems[i].name;
-                    text+="Song name: "+songName+"\r\n"+"Artists: ";
-                    for(var j = 0; j<dataItems[i].artists.length;j++){
-                        var artist =dataItems[i].artists[j].name;
-                        if(j===dataItems[i].artists.length-1){
-                            text+=artist;
-                        }
-                        else{
-                            text+=artist+", ";
-                        }                
-                    }
-                    if(dataItems[i].preview_url!==null){
-                          var previewLink = "Preview link: "+dataItems[i].preview_url;
-                    }
-                    else{
-                        // var previewLink = "Preview link: N/A";
-                        //if preview link not available, show external url
-                        var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
-                    }
-                    var album = "Album: "+dataItems[i].album.name; 
-                    text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n";                   
-                } 
-                console.log(text);
-                appendFile(text+"------------------------------------\r\n");     
-            }
-            else{
-                var message = "Song not found!";
-                text+=message;
-                console.log(message);
-                appendFile(text+"\r\n\r\n------------------------------------\r\n");
-            }
-           
-           
-         });
+        var count = 5;
+    }
+    //else print only the default song
+    else{
+        var count = 1;
+        inputArg = defaultSong;
+    }
+    spotify.search({ type: 'track', query: inputArg, limit: count}, function(err, data) {
+        var dataItems = data.tracks.items;
+        if (err) {
+            var error = "Error occurred: " + err;
+            appendFile(error+"\r\n------------------------------------\r\n");
+            return console.log(error);
+        }
+        if(dataItems.length>0){
+            for(var i = 0; i < dataItems.length; i++){
+                printSong(dataItems,i);  
+            } 
+            console.log(text);
+            appendFile(text+"------------------------------------\r\n");     
+        }
+        else{
+            var message = "Song not found!";
+            text+=message;
+            console.log(message);
+            appendFile(text+"\r\n\r\n------------------------------------\r\n");
+        }
+    });
         
+}
+    
+function printSong(dataItems,i){
+    var songName = dataItems[i].name;
+    text+="Song name: "+songName+"\r\n"+"Artists: ";
+    for(var j = 0; j<dataItems[i].artists.length;j++){
+        var artist =dataItems[i].artists[j].name;
+        if(j===dataItems[i].artists.length-1){
+            text+=artist;
+        }
+        else{
+            text+=artist+", ";
+        }                
+    }
+    if(dataItems[i].preview_url!==null){
+            var previewLink = "Preview link: "+dataItems[i].preview_url;
     }
     else{
-        text+= defaultSong;
-        console.log(text);
-        appendFile(text+"\r\n\r\n------------------------------------\r\n");
-    }   
+        // var previewLink = "Preview link: N/A";
+        //if preview link not available, show external url
+        var previewLink = "Preview link: "+dataItems[i].external_urls.spotify;
+    }
+    var album = "Album: "+dataItems[i].album.name; 
+    text+="\r\n"+previewLink+"\r\n"+album+"\r\n\r\n"; 
 }
 
 function movieThis(inputArg){
@@ -152,11 +155,8 @@ function movieThis(inputArg){
             console.log(text);
             appendFile(text+"\r\n------------------------------------\r\n");    
         }
-    }
-   
-    
-    });
-        
+     }    
+    });     
 }
 
 function doWhatItSays(){   
