@@ -20,18 +20,20 @@ var doWhatSays = false;
 //append all strings after command
 for(var i =3; i<process.argv.length;i++){
     var input = process.argv[i];
-    inputArg = inputArg+" "+input;
+    inputArg = inputArg+"+"+input;
     if(i==3){
         inputArg = input;
     }
 }
+//remove plus sign while displaying names
+var modifiedArg = inputArg.split("+").join(" ");
 
 //twitter variables
 var tweeterCount = 20;
 var twitterScreenName = "aliceliriliri"; //optional param. replace screen_name by any twitter username
 
 var text='';
-var commandtext = "Command: "+command+" "+inputArg+"\r\n------------------------------------\r\n";
+var commandtext = "Command: "+command+" "+modifiedArg+"\r\n------------------------------------\r\n";
 
 runCommands(command,inputArg);
 
