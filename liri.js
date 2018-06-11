@@ -12,10 +12,10 @@ var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
 
 var command = process.argv[2];
-//if no song is provided
-var defaultSong = 'The Sign Ace of Base';
+var defaultSong = 'The Sign Ace of Base';//if no song is provided
 
 var inputArg="";
+var doWhatSays = false;
 
 //append all strings after command
 for(var i =3; i<process.argv.length;i++){
@@ -33,24 +33,25 @@ var twitterScreenName = "aliceliriliri"; //optional param. replace screen_name b
 var text='';
 var commandtext = "Command: "+command+" "+inputArg+"\r\n------------------------------------\r\n";
 
+runCommands(command,inputArg);
 
-switch (command) {
-    case "my-tweets":
+function runCommands(command,inputArg){
+    if(command === "my-tweets"){
         myTweets();
-        break;
-    case "spotify-this-song":
+    }
+    else if(command === "spotify-this-song"){
         spotifyThisSong(inputArg);
-        break;
-    case "movie-this":
+    }
+    else if(command === "movie-this"){
         movieThis(inputArg);
-        break;
-    case "do-what-it-says":
+    }
+    else if(command === "do-what-it-says" && !doWhatSays){
         doWhatItSays();
-        break;
+    }
 }
 
-function myTweets(){
-   
+
+function myTweets(){ 
     var params = {screen_name: twitterScreenName, count: tweeterCount};
     client.get('statuses/user_timeline', params, function(error, tweets, response) {
     if (!error) {
@@ -95,8 +96,7 @@ function spotifyThisSong(inputArg){
             console.log(message);
             appendFile(text+"\r\n\r\n------------------------------------\r\n");
         }
-    });
-        
+    });      
 }
     
 function printSong(dataItems,i){
@@ -123,7 +123,6 @@ function printSong(dataItems,i){
 }
 
 function movieThis(inputArg){
-  
     if(!inputArg){
         inputArg = "Mr.Nobody";
     }
@@ -142,22 +141,22 @@ function movieThis(inputArg){
             appendFile(text+"------------------------------------\r\n");
         }
         else{
-            var title = "Title: " + movieObject.Title+"\r\n";
-            var year = "Year: " +  movieObject.Year+"\r\n";
-            var imdb = "IMDB Rating: " +  movieObject.imdbRating+"\r\n";
-            var country = "Country Produced: " + movieObject.Country+"\r\n";
-            var language = "Language: " +  movieObject.Language+"\r\n";
-            var plot = "Plot: " + movieObject.Plot+"\r\n";
-            var actors = "Actors: " + movieObject.Actors+"\r\n";
+            var title = "Title: " + movieObject.Title;
+            var year = "Year: " +  movieObject.Year;
+            var imdb = "IMDB Rating: " +  movieObject.imdbRating;
+            var country = "Country Produced: " + movieObject.Country;
+            var language = "Language: " +  movieObject.Language;
+            var plot = "Plot: " + movieObject.Plot;
+            var actors = "Actors: " + movieObject.Actors;
             if(movieObject.Ratings.length>1){
-                var rating =  "Rotten Tomato Rating: " +movieObject.Ratings[1].Value+"\r\n";
+                var rating =  "Rotten Tomato Rating: " +movieObject.Ratings[1].Value;
             }
             else{
-                var rating =  "Rotten Tomato Rating: N/A\r\n";
+                var rating =  "Rotten Tomato Rating: N/A";
             }
-            text+=title+year+imdb+rating+country+language+plot+actors;
+            text+=title+"\r\n"+year+"\r\n"+imdb+"\r\n"+rating+"\r\n"+country+"\r\n"+language+"\r\n"+plot+"\r\n"+actors;
             console.log(text);
-            appendFile(text+"\r\n------------------------------------\r\n");    
+            appendFile(text+"\r\n\r\n------------------------------------\r\n");    
         }
      }    
     });     
@@ -167,25 +166,15 @@ function doWhatItSays(){
         fs.readFile("random.txt", "utf8", function(error, data) {
 
             if (error) {
-            return console.log(error);
+              return console.log(error);
             }
-        
+            doWhatSays = true;
             var dataArr = data.split(",");
         
             var command = dataArr[0];
             var trackOrMovie = dataArr[1];
-
-            switch (command) {
-                case "my-tweets":
-                    myTweets();
-                    break;
-                case "spotify-this-song":
-                    spotifyThisSong(trackOrMovie);
-                    break;
-                case "movie-this":
-                    movieThis(trackOrMovie);
-                    break;
-            }       
+            runCommands(command,trackOrMovie);
+            doWhatSays = false; 
     });
 }
 
